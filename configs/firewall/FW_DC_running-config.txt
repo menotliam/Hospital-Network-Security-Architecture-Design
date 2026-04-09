@@ -1,0 +1,120 @@
+: Saved
+:
+ASA Version 9.6(1)
+!
+hostname ciscoasa
+names
+!
+interface GigabitEthernet1/1
+ nameif outside_1
+ security-level 0
+ ip address 10.255.1.2 255.255.255.252
+!
+interface GigabitEthernet1/2
+ nameif outside_2
+ security-level 0
+ ip address 10.255.1.6 255.255.255.252
+!
+interface GigabitEthernet1/3
+ nameif inside_serv
+ security-level 100
+ ip address 10.0.2.1 255.255.255.192
+!
+interface GigabitEthernet1/4
+ nameif inside_dmz
+ security-level 50
+ ip address 10.0.3.1 255.255.255.224
+!
+interface GigabitEthernet1/5
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/6
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/7
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/8
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+interface Management1/1
+ management-only
+ no nameif
+ no security-level
+ no ip address
+ shutdown
+!
+!
+route outside_1 0.0.0.0 0.0.0.0 10.255.1.1 1
+route outside_2 0.0.0.0 0.0.0.0 10.255.1.5 254
+!
+access-list OUTSIDE_IN extended permit udp any host 10.0.2.10 eq bootps
+access-list OUTSIDE_IN extended permit ip 10.0.10.0 255.255.255.128 host 10.0.2.16
+access-list OUTSIDE_IN extended permit icmp 10.0.10.0 255.255.255.128 host 10.0.2.1
+access-list OUTSIDE_IN extended permit icmp 10.0.11.0 255.255.255.0 host 10.0.2.1
+access-list OUTSIDE_IN extended permit ip 10.0.11.0 255.255.255.0 host 10.0.2.11
+access-list OUTSIDE_IN extended permit ip 10.0.11.0 255.255.255.0 host 10.0.2.12
+access-list OUTSIDE_IN extended permit ip 10.0.11.0 255.255.255.0 host 10.0.2.13
+access-list OUTSIDE_IN extended permit ip 10.0.11.0 255.255.255.0 host 10.0.2.14
+access-list OUTSIDE_IN extended permit ip 10.0.12.0 255.255.254.0 host 10.0.2.12
+access-list OUTSIDE_IN extended permit ip 10.0.12.0 255.255.254.0 host 10.0.2.13
+access-list OUTSIDE_IN extended permit icmp 10.0.12.0 255.255.254.0 host 10.0.2.1
+access-list OUTSIDE_IN extended permit ip 10.0.6.0 255.255.255.192 10.0.2.0 255.255.255.192
+access-list OUTSIDE_IN extended permit ip 10.0.6.0 255.255.255.192 10.0.3.0 255.255.255.224
+access-list OUTSIDE_IN extended permit ip 10.0.9.0 255.255.255.224 host 10.0.2.11
+access-list OUTSIDE_IN extended permit ip 10.0.9.0 255.255.255.224 host 10.0.2.12
+access-list OUTSIDE_IN extended permit ip 10.0.9.0 255.255.255.224 host 10.0.2.13
+access-list OUTSIDE_IN extended permit ip 10.0.9.0 255.255.255.224 host 10.0.2.14
+access-list OUTSIDE_IN extended permit ip 10.0.9.0 255.255.255.224 host 10.0.2.16
+access-list OUTSIDE_IN extended permit icmp 10.0.9.0 255.255.255.224 host 10.0.2.1
+access-list OUTSIDE_IN extended permit ip 10.0.40.0 255.255.255.0 host 10.0.2.17
+access-list OUTSIDE_IN extended permit icmp 10.0.40.0 255.255.255.0 host 10.0.2.1
+access-list OUTSIDE_IN extended permit tcp any host 10.0.3.10 eq www
+access-list OUTSIDE_IN extended permit tcp any host 10.0.3.10 eq 443
+access-list OUTSIDE_IN extended permit tcp any host 10.0.3.11 eq smtp
+access-list OUTSIDE_IN extended permit udp any host 10.0.2.15 eq domain
+access-list OUTSIDE_IN extended permit ip 10.1.0.0 255.255.0.0 10.0.2.0 255.255.255.192
+access-list OUTSIDE_IN extended permit ip 10.1.0.0 255.255.0.0 10.0.3.0 255.255.255.224
+access-list OUTSIDE_IN extended permit ip 10.2.0.0 255.255.0.0 10.0.3.0 255.255.255.224
+access-list OUTSIDE_IN extended permit ip 10.2.0.0 255.255.0.0 10.0.2.0 255.255.255.192
+access-list DMZ_OUT extended deny ip 10.0.3.0 255.255.255.224 10.0.0.0 255.0.0.0
+access-list DMZ_OUT extended permit ip 10.0.3.0 255.255.255.224 any
+!
+!
+access-group OUTSIDE_IN in interface outside_1
+access-group OUTSIDE_IN in interface outside_2
+access-group DMZ_OUT out interface inside_dmz
+!
+!
+class-map inspection_default
+ match default-inspection-traffic
+!
+policy-map type inspect dns preset_dns_map
+ parameters
+  message-length maximum 512
+policy-map global_policy
+ class inspection_default
+  inspect dns preset_dns_map
+  inspect ftp 
+  inspect tftp 
+!
+service-policy global_policy global
+!
+telnet timeout 5
+ssh timeout 5
+!
+!
+!
+!

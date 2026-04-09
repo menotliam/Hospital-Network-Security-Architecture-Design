@@ -56,6 +56,7 @@ The design focuses on:
 - **Access Layer**  
   End-user devices, wireless access  
 
+![Visualization](simulation/screenshot.jpg)
 ---
 
 ### 🌐 Multi-Site Topology
@@ -163,12 +164,12 @@ This project applies **enterprise security principles**:
 ├── IP_VLAN_Plan.pdf
 
 /simulation
-├── hospital_network.pkt
+├── net_simulation.pkt
+├── screenshot.jpeg
 
 /configs
-├── core.txt
-├── distribution.txt
-├── access.txt
+├── router
+├── switch
 ├── asa_firewall.txt
 ```
 ---
